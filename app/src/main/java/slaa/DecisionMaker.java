@@ -10,6 +10,8 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 
+import java.util.Objects;
+
 
 public class DecisionMaker {
     private Activity currentActivity;
@@ -93,7 +95,9 @@ public class DecisionMaker {
             }
 
             if (command != null && command != "" && command != "unknown") {
-
+                if(Objects.equals(current_activity, close)){
+                    closeApp(activity);
+                }
                 switch (command.toLowerCase()) {
                     case COMMAND_HELLO:
                     case COMMAND_CALL_BOT:
@@ -103,7 +107,7 @@ public class DecisionMaker {
                         break;
                     case close:
                         handleResponse(message);
-                        closeApp();
+                        current_activity=close;
                     case ask_name:
                     case "ask_introduction":
                         handleResponse(message);
@@ -225,7 +229,8 @@ public class DecisionMaker {
             }
         }
     }
-    public void closeApp() {
+    public void closeApp(Activity activity) {
+        activity.finishAffinity();
         System.exit(0);   // Forcefully terminates the process (use with caution)
     }
     private void handleResponse(String message) {
