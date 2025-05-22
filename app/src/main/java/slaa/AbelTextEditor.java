@@ -35,21 +35,8 @@ public class AbelTextEditor extends AppCompatActivity {
     private Button btnSave, btnOpen, btnClear;
     private Button btnPythonSave, btnPythonOpen, btnRandomWords;
 
-
-
-//
-//    // ✅ BroadcastReceiver to receive speech result
-//    private final BroadcastReceiver speechReceiver = new BroadcastReceiver() {
-//        @Override
-//        public void onReceive(Context context, Intent intent) {
-//            if ("SPEECH_RESULT".equals(intent.getAction())) {
-//                String recognizedText = intent.getStringExtra("recognized_text");
-//                if (recognizedText != null && !recognizedText.trim().isEmpty()) {
-//                    editText.append(recognizedText + " ");
-//                }
-//            }
-//        }
-//    };
+    private DecisionMaker decisionMaker;
+    private TextRecognizer textRecognizer;
 
 
 
@@ -64,15 +51,14 @@ public class AbelTextEditor extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+        // Initialize components
+        textRecognizer = new TextRecognizer(this);
+        decisionMaker = new DecisionMaker(this, editText);
+        textRecognizer.setDecisionMaker(decisionMaker);
+        decisionMaker.setTextRecognizer(textRecognizer);
+
 
         editText = findViewById(R.id.editText);
-//        // Get recognized text from intent
-//        String recognizedText = getIntent().getStringExtra("recognized_text");
-//        if (recognizedText != null) {
-//            editText.setText(recognizedText);
-//        }
-
-
         btnSave = findViewById(R.id.btnSave);
         btnOpen = findViewById(R.id.btnOpen);
         btnClear = findViewById(R.id.btnClear);
@@ -80,6 +66,11 @@ public class AbelTextEditor extends AppCompatActivity {
         btnPythonOpen = findViewById(R.id.btnPythonOpen);
         btnRandomWords = findViewById(R.id.btnRandomWords);
 
+        TextAppender.setEditText(editText);
+        TextAppender.setContext(this);  // So we can use context in Chaquopy call
+
+        // Simulate call from another class
+        DecisionMaker.writeDown("","normal", "black", "white");
 
 
     }

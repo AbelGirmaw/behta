@@ -3,16 +3,25 @@ import random
 
 def get_file_path(context):
     files_dir = context.getFilesDir().getAbsolutePath()
-    folder_path = os.path.join(files_dir, "chaque")
+    folder_path = os.path.join(files_dir, "student_book")
     os.makedirs(folder_path, exist_ok=True)
-    return os.path.join(folder_path, "example.txt")
+    return os.path.join(folder_path, "student_book.txt")
+def get_student_file_path(context):
+    files_dir = context.getFilesDir().getAbsolutePath()
+    folder_path = os.path.join(files_dir, "student_file")
+    os.makedirs(folder_path, exist_ok=True)
+    return os.path.join(folder_path, "student_note.txt")
 
 def write_text_to_file(context, text):
     file_path = get_file_path(context)
     with open(file_path, "w") as f:
         f.write(text)
-    return f"Written to: {file_path}"
-
+    return 'success fully saved.'
+def write_text_to_student_file(context, text):
+    file_path = get_student_file_path(context)
+    with open(file_path, "w") as f:
+        f.write(text)
+    return 'success fully saved.'
 def edit_file_append(context, new_text):
     file_path = get_file_path(context)
     with open(file_path, "a") as f:

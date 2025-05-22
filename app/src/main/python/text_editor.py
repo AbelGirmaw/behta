@@ -14,7 +14,7 @@ def is_Take_Note(user_input):
         r"\bwrite\s+this\s+down\b",
         r"\bnote\s+this\b",
         r"\bsave\s+(this|it)\b",
-        r"\bi\s+want\s+to\s+(remember|save|note|write)\b",
+        r"\bi\s+(want|wanted|went)\s+to\s+(remember|save|note|write)\b",
         r"\bi\s+need\s+to\s+(remember|note|jot)\b",
         r"\bplease\s+(open|start|launch)\s+(a\s+)?(text editor|notepad)\b",
         r"\blet\s+me\s+(write|save|jot|note)\s+(this|something)\b",

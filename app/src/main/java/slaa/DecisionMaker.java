@@ -10,6 +10,7 @@ import android.widget.TextView;
 
 import org.json.JSONObject;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 
@@ -25,7 +26,25 @@ public class DecisionMaker {
     private String unknown_response;
     private String state;
     private float score;
+    private boolean is_africa_speak=false;
     private String current_activity="";
+    private String color;
+    private String is_color;
+    private String bg_color;
+    private String text_type;
+    private String note_title;
+    private String note_content;
+    private  String is_content_asked;
+    private String content_color;
+    private  String is_asked;
+    private String confirm;
+    private static final String[] colors = {
+
+            "red", "green", "blue", "yellow", "orange", "purple", "pink",
+            "black", "white", "gray", "grey", "brown", "cyan", "magenta",
+            "violet", "indigo", "maroon", "beige", "gold", "silver", "teal"
+    };
+
     private String target_page="MainActivity";
     public String is_close="";
     // Command constants
@@ -61,6 +80,10 @@ public class DecisionMaker {
         this.context = context;
     }
 
+    public DecisionMaker(AbelTextEditor abelTextEditor, EditText editText) {
+
+    }
+
     public void setPracticeListeningActivity(PracticeListening activity) {
         this.practiceListening = activity;
     }
@@ -77,7 +100,7 @@ public class DecisionMaker {
         String message="";
         String user_spoken="";
         String random_words;
-        if (result != "" && result !=null) {
+        if (!Objects.equals(result, "") && result !=null && !is_africa_speak) {
             result = PythonHelper.callPythonFunction("process_command", result,current_activity);
             random_words = PythonHelper.callPythonFileManagerFunction("get_100_random_words", activity);
             String jsonString = result;
@@ -88,13 +111,15 @@ public class DecisionMaker {
                 command = json.getString("intent");
                 message = json.getString("message");
                 user_spoken = json.getString("user_spoken");
-
+                if (current_activity == "take_note" && Objects.equals(command,current_activity)){
+                    confirm= json.getString("confirm");
+                }
 
             } catch (Exception e) {
                 command = e.toString();
             }
 
-            if (command != null && command != "" && command != "unknown") {
+            if (command != "" && command != "unknown") {
                 if(Objects.equals(current_activity, close)){
                     closeApp(activity);
                 }
@@ -186,8 +211,151 @@ public class DecisionMaker {
                         command=null;
                         break;
                     case OPEN_TEXT_EDITOR:
-                        handleResponse(message, AbelTextEditor.class);
-                        break;
+                        if(current_activity  != OPEN_TEXT_EDITOR){
+                            handleResponse("in current activity "+message, AbelTextEditor.class);
+                            current_activity=OPEN_TEXT_EDITOR;
+                            break;
+                        }
+                        else {
+                            if(text_type == null){
+                                if (is_asked == null){
+                                    is_asked="yes";
+                                    handleResponse("what is your note title please tell me");
+                                    break;
+                                }
+                                else if (Objects.equals(confirm,"yes")){
+                                    text_type="title_one";
+                                    handleResponse("ok by which color you want to write");
+                                    break;
+                                }
+                                else if(Objects.equals(confirm,"no")){
+                                    handleResponse("please tell me the correct title again");
+                                    break;
+                                }
+                                else if(confirm != null){
+                                    note_title=user_spoken;
+                                    handleResponse(" your note title is "+note_title +"\n is it correct");
+                                    break;
+                                }
+                                else {
+                                    handleResponse("please confirm the title. just say yes or no");
+                                    break;
+                                }
+
+                            }else if(color== null){
+                                boolean found = isColorExist(confirm);
+                                if (is_asked == null){
+                                    is_asked="yes";
+                                    handleResponse("by which color i write? please tell me the title color");
+                                    break;
+                                }
+                                else if (Objects.equals(confirm,"yes")&& is_color!=null){
+                                    color= is_color;
+                                    handleResponse("please tell me the for ground color.");
+                                    is_color=null;
+                                    break;
+                                }
+                                else if(Objects.equals(confirm,"no")){
+                                    handleResponse("ok please tell me the correct color.");
+                                    is_color=null;
+                                    break;
+                                }
+                                else if(found){
+                                    is_color=confirm;
+                                    handleResponse(" your title color is "+is_color +" is it correct");
+                                    break;
+                                }
+                                else {
+                                    handleResponse(" please tell me the correct color");
+                                    break;
+                                }
+                            }else if(bg_color== null) {
+                                boolean found = isColorExist(confirm);
+                                if (is_asked == null) {
+                                    is_asked = "yes";
+                                    handleResponse("do you want add for ground color. please tell me");
+                                    break;
+                                } else if (Objects.equals(confirm, "yes") && is_color != null) {
+                                    bg_color = is_color;
+                                    writeDown(note_title,text_type,color,bg_color);
+                                    handleResponse("ok i write the title,please tell me the content color.");
+                                    is_color=null;
+                                    break;
+
+                                } else if (Objects.equals(confirm, "no")) {
+                                    handleResponse("please tell me The correct for ground color. white  or what?");
+                                    is_color=null;
+                                    break;
+                                } else if (found) {
+                                    is_color = confirm;
+                                    handleResponse(" your for ground  color is " + is_color + " is it correct");
+                                    break;
+                                }else {
+                                    handleResponse("please select and confirm your title for ground color");
+                                    break;
+                                }
+
+                            }else if(note_title != null) {
+                                if(content_color==null){
+                                    boolean found = isColorExist(confirm);
+                                    if (is_asked == null) {
+                                        is_asked = "yes";
+                                        handleResponse("do you want to change the content color. please tell me");
+                                        break;
+                                    } else if (Objects.equals(confirm, "yes") && is_color != null) {
+                                        content_color = is_color;
+                                        is_content_asked="yes";
+                                        handleResponse(" please tell me the content text what i write");
+                                        is_color=null;
+                                        break;
+                                    } else if (Objects.equals(confirm, "no")) {
+                                        handleResponse("please tell me correct content color. what you want black or what?");
+                                        is_color=null;
+                                        break;
+                                    } else if (found) {
+                                        is_color = confirm;
+                                        handleResponse(" your text  color is " + is_color + " is it correct");
+                                        break;
+                                    }
+                                    else {
+                                        handleResponse("please select and confirm your content text color");
+                                        break;
+                                    }
+                                }else{
+                                    if (is_content_asked==null)
+                                    {
+                                        handleResponse("please tell me the content what you want write");
+                                        is_content_asked="yes";
+                                        break;
+                                    }
+
+                                     else if (Objects.equals(confirm, "yes") && note_content!=null) {
+                                        writeDown(note_content,"normal",content_color,"white");
+                                        handleResponse("okay,i write that correctly please tell me the next.");
+                                        note_content=null;
+                                        break;
+                                    } else if (Objects.equals(confirm, "no")) {
+                                        handleResponse("okay,please tell me what i write");
+                                        note_content=null;
+
+                                        break;
+                                    }else if (note_content == null){
+                                        handleResponse("am i correct? you ask to write "+user_spoken);
+                                        note_content=user_spoken;
+                                        break;
+                                    }
+                                     else{
+                                         handleResponse("please confirm just say yes or no, your text is."+note_content);
+                                         break;
+                                     }
+                                }
+                            }
+                            else {
+                                handleResponse("the color is already selected please confirm it");
+                                break;
+                            }
+
+                        }
                     case FILE_WRITE:
                         String result1 = PythonHelper.callPythonFileManagerFunction("write_text_to_file", activity, "Initial text here.");
                         handleResponse(result1);
@@ -219,16 +387,42 @@ public class DecisionMaker {
                         break;
 
                     case COMMAND_UNKNOWN:
-                        unknown_response += command;
+                        handleResponse(command);
 //
-//                    default:
-//                        handleResponse(command);
+                    default:
+                        handleResponse(command);
+
                 }
             } else {
                 handleResponse("Error processing command");
             }
+        }else {
+            resumeListening();
         }
     }
+
+private void resumeListening(){
+        is_africa_speak=false;
+}
+    private static  Boolean isColorExist(String color){
+        Boolean is_color=false;
+        for (String name : colors){
+            if(Objects.equals(color,name)){
+                is_color=true;
+                break;
+            }
+        }
+        return is_color;
+    }
+
+    public static void writeDown(String text, String text_type, String textColor, String bgColor) {
+        // Append from non-activity class
+        text_type=text_type;
+        TextAppender.textWriter(text,text_type,textColor,bgColor);
+    }
+
+
+
     public void closeApp(Activity activity) {
         activity.finishAffinity();
         System.exit(0);   // Forcefully terminates the process (use with caution)

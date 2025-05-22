@@ -5,6 +5,8 @@ import africa
 import practice_speaking
 import practice_listening
 import text_editor
+import confirm_intent
+import format_and_style
 def greet(name):
     return f"Hello {name} from Python!"
 
@@ -41,6 +43,18 @@ def process_command(command,current_activity):
                 return {'intent':"practice_speaking",'message':'','user_spoken':user_spoken}
             elif current_activity=="practice_listening":
                 return {'intent': "practice_listening", 'message': '', 'user_spoken': user_spoken}
+            elif current_activity == "take_note":
+                print("in take note")
+                confirm="other"
+                try:
+                    confirm=confirm_intent.identify_confirm_intent(user_spoken)
+                    if confirm=='other':
+                        confirm=format_and_style.detect_color_intent(user_spoken)
+                except Exception as e:
+                    print("the error is ",e)
+
+                print('this is confirm data',confirm)
+                return {'intent': "take_note", 'message': 'no', 'user_spoken': user_spoken,'confirm':confirm}
 
         if not is_call:
             intent=africa.is_bot_called(command)
